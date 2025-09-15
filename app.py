@@ -115,13 +115,13 @@ def run_prophet(train_data, test_data):
 def compare_models():
     st.subheader("Model Comparison")
     files = {
-        'Prophet': (r'data\prophet.csv', run_prophet),
-        'ARIMA': (r'data\arima_data.csv', run_arima),
-        'SARIMA': (r'data\arima_data.csv', run_sarima),
-        'LSTM': (r'data\scaled_data.csv', run_lstm)
+        'Prophet': ('data/prophet.csv', run_prophet),
+        'ARIMA': ('data/arima_data.csv', run_arima),
+        'SARIMA': ('data/arima_data.csv', run_sarima),
+        'LSTM': ('data/scaled_data.csv', run_lstm)
     }
     results = {}
-    lstm_model = load_lstm_model(r'notebook\lstm_trained.h5')
+    lstm_model = load_lstm_model('notebook/lstm_trained.h5')
     for name, (path, func) in files.items():
         data = load_and_preprocess_data(path, 'Prophet' if name=='Prophet' else 'ARIMA')
         if data is not None:
@@ -149,11 +149,11 @@ model_choice = st.sidebar.selectbox("Forecasting Model", ('Prophet','ARIMA','SAR
 
 ts_data = None
 if model_choice == 'Prophet':
-    ts_data = load_and_preprocess_data(r'data\prophet.csv','Prophet')
+    ts_data = load_and_preprocess_data('data/prophet.csv','Prophet')
 elif model_choice == 'LSTM':
-    ts_data = load_and_preprocess_data(r'data\scaled_data.csv','LSTM')
+    ts_data = load_and_preprocess_data('data/scaled_data.csv','LSTM')
 else:
-    ts_data = load_and_preprocess_data(r'data\arima_data.csv','ARIMA/SARIMA')
+    ts_data = load_and_preprocess_data('data/arima_data.csv','ARIMA/SARIMA')
 
 if ts_data is not None:
     st.subheader("Historical Data")
@@ -163,7 +163,7 @@ if ts_data is not None:
     train_data = ts_data[:train_size]
     test_data = ts_data[train_size:]
 
-    lstm_model = load_lstm_model(r'notebook\lstm_trained.h5')
+    lstm_model = load_lstm_model('notebook/lstm_trained.h5')
 
     forecast = None
     if model_choice == 'ARIMA':
