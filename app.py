@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 warnings.filterwarnings("ignore")
 
-# --- Cached Data Loading ---
+# Cached Data Loading
 @st.cache_data
 def load_and_preprocess_data(file_path, model_type):
     try:
@@ -40,12 +40,12 @@ def load_and_preprocess_data(file_path, model_type):
         st.error(f"Error loading data: {e}")
         return None
 
-# --- Cached LSTM Model Load ---
+# Cached LSTM Model Load
 @st.cache_resource
 def load_lstm_model(path):
     return tf.keras.models.load_model(path)
 
-# --- LSTM Forecast ---
+# LSTM Forecast
 def run_lstm(train_data, test_data, model):
     try:
         scaler = MinMaxScaler()
@@ -77,7 +77,7 @@ def run_lstm(train_data, test_data, model):
         st.error(f"LSTM failed: {e}")
         return pd.Series(np.nan, index=test_data.index)
 
-# --- ARIMA Forecast ---
+# ARIMA Forecast
 def run_arima(train_data, test_data):
     try:
         model = ARIMA(train_data['Close'], order=(1,1,1))
@@ -89,7 +89,7 @@ def run_arima(train_data, test_data):
         st.error(f"ARIMA failed: {e}")
         return pd.Series(np.nan, index=test_data.index)
 
-# --- SARIMA Forecast ---
+# SARIMA Forecast
 def run_sarima(train_data, test_data):
     try:
         model = SARIMAX(train_data['Close'], order=(1,1,1), seasonal_order=(1,1,1,12))
@@ -101,7 +101,7 @@ def run_sarima(train_data, test_data):
         st.error(f"SARIMA failed: {e}")
         return pd.Series(np.nan, index=test_data.index)
 
-# --- Prophet Forecast ---
+# Prophet Forecast
 def run_prophet(train_data, test_data):
     prophet_df = train_data.reset_index().rename(columns={'Date':'ds','Close':'y'})
     model = Prophet(daily_seasonality=True)
@@ -111,17 +111,17 @@ def run_prophet(train_data, test_data):
     forecast = pd.Series(forecast_df['yhat'].values, index=test_data.index)
     return forecast
 
-# --- Model Comparison (Button Click) ---
+#Model Comparison
 def compare_models():
-    st.subheader("📊 Model Comparison")
+    st.subheader("Model Comparison")
     files = {
-        'Prophet': (r'D:\Projects\Stock_analysis\data\prophet.csv', run_prophet),
-        'ARIMA': (r'D:\Projects\Stock_analysis\data\arima_data.csv', run_arima),
-        'SARIMA': (r'D:\Projects\Stock_analysis\data\arima_data.csv', run_sarima),
-        'LSTM': (r'D:\Projects\Stock_analysis\data\scaled_data.csv', run_lstm)
+        'Prophet': (r'data\prophet.csv', run_prophet),
+        'ARIMA': (r'data\arima_data.csv', run_arima),
+        'SARIMA': (r'data\arima_data.csv', run_sarima),
+        'LSTM': (r'data\scaled_data.csv', run_lstm)
     }
     results = {}
-    lstm_model = load_lstm_model(r'D:\Projects\Stock_analysis\notebook\lstm_trained.h5')
+    lstm_model = load_lstm_model(r'notebook\lstm_trained.h5')
     for name, (path, func) in files.items():
         data = load_and_preprocess_data(path, 'Prophet' if name=='Prophet' else 'ARIMA')
         if data is not None:
@@ -143,17 +143,17 @@ def compare_models():
         st.error("No model ran successfully.")
 
 # --- Streamlit UI ---
-st.title("📊 Stock Forecast Dashboard")
+st.title("Stock Forecast Dashboard")
 st.sidebar.header("Select Model")
 model_choice = st.sidebar.selectbox("Forecasting Model", ('Prophet','ARIMA','SARIMA','LSTM'))
 
 ts_data = None
 if model_choice == 'Prophet':
-    ts_data = load_and_preprocess_data(r'D:\Projects\Stock_analysis\data\prophet.csv','Prophet')
+    ts_data = load_and_preprocess_data(r'data\prophet.csv','Prophet')
 elif model_choice == 'LSTM':
-    ts_data = load_and_preprocess_data(r'D:\Projects\Stock_analysis\data\scaled_data.csv','LSTM')
+    ts_data = load_and_preprocess_data(r'data\scaled_data.csv','LSTM')
 else:
-    ts_data = load_and_preprocess_data(r'D:\Projects\Stock_analysis\data\arima_data.csv','ARIMA/SARIMA')
+    ts_data = load_and_preprocess_data(r'data\arima_data.csv','ARIMA/SARIMA')
 
 if ts_data is not None:
     st.subheader("Historical Data")
@@ -163,7 +163,7 @@ if ts_data is not None:
     train_data = ts_data[:train_size]
     test_data = ts_data[train_size:]
 
-    lstm_model = load_lstm_model(r'D:\Projects\Stock_analysis\notebook\lstm_trained.h5')
+    lstm_model = load_lstm_model(r'notebook\lstm_trained.h5')
 
     forecast = None
     if model_choice == 'ARIMA':
